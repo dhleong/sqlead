@@ -76,7 +76,7 @@ class SQLeadSupportDatabase(
     ): Cursor {
         return SQLeadStatement(conn, query.sql!!).also {
             query.bindTo(it)
-        }.query()
+        }.query(query)
     }
 
     override fun endTransaction() {

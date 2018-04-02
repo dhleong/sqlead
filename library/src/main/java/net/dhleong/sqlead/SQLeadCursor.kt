@@ -1,5 +1,6 @@
 package net.dhleong.sqlead
 
+import android.arch.persistence.db.SupportSQLiteQuery
 import android.content.ContentResolver
 import android.database.CharArrayBuffer
 import android.database.ContentObserver
@@ -13,15 +14,17 @@ import java.sql.ResultSet
 internal class SQLeadCursor(
     private val conn: Connection,
     private val sql: String,
+    private val query: SupportSQLiteQuery,
     private val results: ResultSet
 ) : Cursor {
 
     private var extras = Bundle.EMPTY
 
     private val myCount by lazy {
-        conn.createStatement().use {
-            it.executeQuery("SELECT COUNT(*) FROM ($sql)")
-                .getInt(0)
+        val countQuery = "SELECT COUNT(*) FROM ($sql)"
+        SQLeadStatement(conn, countQuery).use {
+            query.bindTo(it)
+            it.simpleQueryForLong().toInt()
         }
     }
 

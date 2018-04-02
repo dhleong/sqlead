@@ -7,11 +7,16 @@ import android.arch.persistence.db.SupportSQLiteOpenHelper
  * @author dhleong
  */
 class SQLeadOpenHelper(
-    private val config: SupportSQLiteOpenHelper.Configuration
+    private val config: SupportSQLiteOpenHelper.Configuration,
+    inMemory: Boolean = true
 ) : SupportSQLiteOpenHelper {
 
     private val db by lazy {
-        SQLeadSupportDatabase().also {
+        SQLeadSupportDatabase(
+            dbPath =
+                if (inMemory) null
+                else databaseName
+        ).also {
             config.callback.onCreate(it)
         }
     }

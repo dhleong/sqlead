@@ -1,5 +1,6 @@
 package net.dhleong.sqlead
 
+import android.arch.persistence.db.SupportSQLiteQuery
 import android.arch.persistence.db.SupportSQLiteStatement
 import android.database.Cursor
 import java.sql.Connection
@@ -15,7 +16,9 @@ internal class SQLeadStatement(
         stmt.setLong(index, value)
     }
 
-    override fun simpleQueryForLong(): Long = stmt.executeQuery().getLong(0)
+    override fun simpleQueryForLong(): Long = stmt.executeQuery().use {
+        it.getLong(1)
+    }
 
     override fun bindString(index: Int, value: String?) {
         stmt.setString(index, value)
@@ -25,7 +28,9 @@ internal class SQLeadStatement(
         stmt.setDouble(index, value)
     }
 
-    override fun simpleQueryForString(): String = stmt.executeQuery().getString(0)
+    override fun simpleQueryForString(): String = stmt.executeQuery().use {
+        it.getString(1)
+    }
 
     override fun clearBindings() {
         stmt.clearParameters()
@@ -51,11 +56,11 @@ internal class SQLeadStatement(
         stmt.setString(index, null)
     }
 
-    fun query(): Cursor = SQLeadCursor(
+    fun query(query: SupportSQLiteQuery): Cursor = SQLeadCursor(
         conn,
         sql,
+        query,
         stmt.executeQuery()
     )
-
 }
 

@@ -1,45 +1,13 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.db.SupportSQLiteOpenHelper
 import assertk.assert
 import assertk.assertions.isEqualTo
-import com.nhaarman.mockito_kotlin.mock
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 /**
  * @author dhleong
  */
-class QueryTest {
-
-    private lateinit var db: SupportSQLiteDatabase
-
-    @Before fun setUp() {
-        db = SQLeadOpenHelper(
-            SupportSQLiteOpenHelper.Configuration.builder(mock {  })
-                .callback(object : SupportSQLiteOpenHelper.Callback(1) {
-                    override fun onCreate(db: SupportSQLiteDatabase?) {
-                        initDb()
-                    }
-
-                    override fun onUpgrade(db: SupportSQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-                        throw UnsupportedOperationException()
-                    }
-                })
-                .name("test.db")
-                .build()
-        ).writableDatabase
-    }
-
-    private fun initDb() {
-        // TODO
-    }
-
-    @After fun tearDown() {
-        db.close()
-    }
+class QueryTest : BaseDbTest() {
 
     @Test fun `Simple query`() {
         val result = db.query("""
@@ -50,6 +18,19 @@ class QueryTest {
         }
 
         assert(result).isEqualTo(42)
+    }
+
+    @Test fun `Simple select`() {
+        val (name, capacity) = db.query("""
+            SELECT name, capacity
+            FROM Ships
+            """
+        ).use {
+            it.getString(1) to it.getInt(2)
+        }
+
+        assert(name).isEqualTo("Serenity")
+        assert(capacity).isEqualTo(42)
     }
 
 }
