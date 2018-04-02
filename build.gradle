@@ -23,7 +23,7 @@ allprojects {
     ext {
         andConf = [
                 minSdk     : 22,
-                sdk        : 26,
+                sdk        : 27,
                 versionCode: 1,
         ]
     }
