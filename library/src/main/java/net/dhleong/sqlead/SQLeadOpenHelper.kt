@@ -2,6 +2,7 @@ package net.dhleong.sqlead
 
 import android.arch.persistence.db.SupportSQLiteDatabase
 import android.arch.persistence.db.SupportSQLiteOpenHelper
+import java.io.File
 
 /**
  * @author dhleong
@@ -17,7 +18,9 @@ class SQLeadOpenHelper(
                 if (inMemory) null
                 else databaseName
         ).also {
-            config.callback.onCreate(it)
+            if (inMemory || !File(databaseName).exists()) {
+                config.callback.onCreate(it)
+            }
         }
     }
 
