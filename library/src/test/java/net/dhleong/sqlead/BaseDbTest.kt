@@ -5,15 +5,26 @@ import android.arch.persistence.db.SupportSQLiteOpenHelper
 import com.nhaarman.mockito_kotlin.mock
 import org.junit.After
 import org.junit.Before
+import java.io.File
 
 /**
  * @author dhleong
  */
-abstract class BaseDbTest {
+abstract class BaseDbTest(
+    inMemory: Boolean = true
+) {
+
+    @Suppress("LeakingThis")
+    private val factory = SQLeadSQLiteOpenHelperFactory(
+        dbDirectory =
+            if (inMemory) null
+            else File(".db-test")
+    )
+
     protected lateinit var db: SupportSQLiteDatabase
 
     @Before fun setUp() {
-        db = SQLeadSQLiteOpenHelperFactory().create(
+        db = factory.create(
             SupportSQLiteOpenHelper.Configuration.builder(mock {  })
                 .callback(object : SupportSQLiteOpenHelper.Callback(1) {
                     override fun onCreate(db: SupportSQLiteDatabase) {

@@ -22,7 +22,8 @@ import java.io.File
  * @author dhleong
  */
 class MigrationTester(
-    dbClass: Class<*>
+    dbClass: Class<*>,
+    dbDirectory: File = File(".db")
 ) : TestRule {
 
     val assets = mock<AssetManager> {
@@ -35,8 +36,7 @@ class MigrationTester(
     val context = mock<Context> {
         on { assets } doReturn assets
         on { getDatabasePath(any()) } doAnswer {
-            File(".", it.getArgument<String>(0)).also {
-                println(it.absoluteFile)
+            File(dbDirectory, it.getArgument<String>(0)).also {
                 if (!it.parentFile.exists()) {
                     it.parentFile.mkdirs()
                 }
@@ -52,7 +52,7 @@ class MigrationTester(
     val helper: MigrationTestHelper = MigrationTestHelper(
         instrumentation,
         dbClass.canonicalName,
-        SQLeadSQLiteOpenHelperFactory(inMemory = false)
+        SQLeadSQLiteOpenHelperFactory(dbDirectory)
     )
 
     override fun apply(base: Statement?, description: Description?): Statement =
@@ -79,8 +79,12 @@ class MigrationTester(
         withNew: (db: SupportSQLiteDatabase) -> Unit = { /* nop by default */ }
     ) {
         val name = "migration-test-${migration.startVersion}-${migration.endVersion}"
+        val dbFile = context.getDatabasePath(name).absoluteFile
 
-        context.getDatabasePath(name).absoluteFile.delete()
+        // ensure it's not there to start, since the helper will delete it anyway,
+        //  but will also warn that they're doing so with Log.d (which may be a stub)
+        dbFile.delete()
+
         helper.createDatabase(name, migration.startVersion)
             .use(withOld)
 

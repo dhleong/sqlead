@@ -9,16 +9,24 @@ import java.io.File
  */
 class SQLeadOpenHelper(
     private val config: SupportSQLiteOpenHelper.Configuration,
-    inMemory: Boolean = true
+    dbDirectory: File? = null
 ) : SupportSQLiteOpenHelper {
 
+    private val dbFile = dbDirectory?.let {
+        if (!it.exists()) it.mkdirs()
+
+        File(dbDirectory, databaseName)
+    }
+
     private val db by lazy {
+        // check *first*, since creating the connection might
+        // implicitly touch the file
+        val dbExists = dbFile != null && dbFile.exists()
+
         SQLeadSupportDatabase(
-            dbPath =
-                if (inMemory) null
-                else databaseName
+            dbPath = dbFile?.path
         ).also {
-            if (inMemory || !File(databaseName).exists()) {
+            if (!dbExists) {
                 config.callback.onCreate(it)
             }
         }
