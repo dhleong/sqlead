@@ -160,7 +160,7 @@ class SQLeadSupportDatabase(
         }
     }
 
-    override fun execSQL(sql: String?, bindArgs: Array<out Any>?) {
+    override fun execSQL(sql: String, bindArgs: Array<out Any>?) {
         val stmt = SimpleSQLiteQuery(sql, bindArgs)
         SQLeadStatement(conn, sql).use {
             stmt.bindTo(it)
