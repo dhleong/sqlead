@@ -33,11 +33,11 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-ext.SQLEAD_GROUP = 'com.github.dhleong'
+ext.SQLEAD_GROUP = 'com.github.dhleong.sqlead'
 ext.SQLEAD_VERSION = '0.1.0'
 
 ext.vs = [
-        db: '1.0.0',
+        room: '1.0.0',
         test: [
                 assertk: '0.9',
                 mockitoKotlin: '1.5.0',
@@ -45,7 +45,8 @@ ext.vs = [
 ]
 
 ext.deps = [
-        db: "android.arch.persistence:db:${vs.db}",
+        db: "android.arch.persistence:db:${vs.room}",
+        roomTesting: "android.arch.persistence.room:testing:${vs.room}",
         sqlite: 'org.xerial:sqlite-jdbc:3.21.0.1',
 
         test: [
