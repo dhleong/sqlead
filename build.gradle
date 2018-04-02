@@ -38,8 +38,18 @@ ext.SQLEAD_VERSION = '0.1.0'
 
 ext.vs = [
         db: '1.0.0',
+        test: [
+                assertk: '0.9',
+                mockitoKotlin: '1.5.0',
+        ]
 ]
 
 ext.deps = [
         db: "android.arch.persistence:db:${vs.db}",
+        sqlite: 'org.xerial:sqlite-jdbc:3.21.0.1',
+
+        test: [
+                assertk: "com.willowtreeapps.assertk:assertk:0.9",
+                mockitoKotlin: "com.nhaarman:mockito-kotlin:${vs.test.mockitoKotlin}",
+        ]
 ]
