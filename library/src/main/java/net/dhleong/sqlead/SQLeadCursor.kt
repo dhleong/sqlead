@@ -12,6 +12,7 @@ import org.sqlite.core.CoreResultSet
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
+import java.sql.SQLException
 import java.sql.Types
 
 internal class SQLeadCursor(
@@ -77,9 +78,12 @@ internal class SQLeadCursor(
         TODO("not implemented")
     }
 
-    override fun getColumnIndexOrThrow(columnName: String?): Int =
+    override fun getColumnIndexOrThrow(columnName: String?): Int = try {
         if (results.isClosed) 0 // it's closed, which means no results anyway
-        else results.findColumn(columnName)
+        else results.findColumn(columnName) - 1  // 1-based -> 0-based
+    } catch (e: SQLException) {
+        throw IllegalArgumentException(e)
+    }
 
     // we have to implement the interface, but it's deprecated so we won't bother
     // to try to support the functionality
@@ -147,7 +151,7 @@ internal class SQLeadCursor(
 
     override fun getColumnIndex(columnName: String?): Int = try {
         getColumnIndexOrThrow(columnName)
-    } catch (e: Throwable) {
+    } catch (e: IllegalArgumentException) {
         -1
     }
 

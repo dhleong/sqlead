@@ -4,6 +4,7 @@ import android.database.Cursor
 import assertk.assert
 import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isTrue
 import org.junit.Test
 
@@ -44,6 +45,25 @@ class CursorTest : BaseDbTest() {
             assert(cursor.getType(1)).isEqualTo(Cursor.FIELD_TYPE_INTEGER)
             assert(cursor.getType(2)).isEqualTo(Cursor.FIELD_TYPE_FLOAT)
             assert(cursor.getType(3)).isEqualTo(Cursor.FIELD_TYPE_NULL)
+        }
+    }
+
+    @Test fun `Test getColumnIndex`() {
+        db.query("""
+            SELECT "a" AS string, 2 AS int, 3.0 AS float
+            """
+        ).use { cursor ->
+            assert(cursor.getColumnIndex("string")).isEqualTo(0)
+            assert(cursor.getColumnIndex("int")).isEqualTo(1)
+            assert(cursor.getColumnIndex("float")).isEqualTo(2)
+            assert(cursor.getColumnIndex("notThere")).isEqualTo(-1)
+
+            assert {
+                cursor.getColumnIndexOrThrow("notThere")
+            }.thrownError {
+                // the API interface specifies that an IllegalArgumentException be thrown
+                isInstanceOf(IllegalArgumentException::class)
+            }
         }
     }
 
