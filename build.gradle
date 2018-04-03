@@ -34,7 +34,7 @@ task clean(type: Delete) {
 }
 
 ext.SQLEAD_GROUP = 'com.github.dhleong.sqlead'
-ext.SQLEAD_VERSION = '0.1.0'
+ext.SQLEAD_VERSION = '0.2.0'
 
 ext.vs = [
         room: '1.0.0',
