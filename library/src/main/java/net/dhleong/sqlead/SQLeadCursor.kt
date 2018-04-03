@@ -8,8 +8,11 @@ import android.database.Cursor
 import android.database.DataSetObserver
 import android.net.Uri
 import android.os.Bundle
+import org.sqlite.core.CoreResultSet
 import java.sql.Connection
 import java.sql.ResultSet
+import java.sql.ResultSetMetaData
+import java.sql.Types
 
 internal class SQLeadCursor(
     private val conn: Connection,
@@ -50,7 +53,6 @@ internal class SQLeadCursor(
 
     override fun getLong(columnIndex: Int): Long = results.getLong(columnIndex + 1)
 
-    //    override fun moveToFirst(): Boolean = results.absolute(0)
     override fun moveToFirst(): Boolean = !results.isClosed // cannot move backwards with jdbc
 
     override fun getFloat(columnIndex: Int): Float = results.getFloat(columnIndex + 1)
@@ -69,7 +71,7 @@ internal class SQLeadCursor(
 
     override fun isFirst(): Boolean = results.isFirst
 
-    override fun isNull(columnIndex: Int): Boolean = results.getObject(columnIndex + 1) == null
+    override fun isNull(columnIndex: Int): Boolean = getType(columnIndex) == Cursor.FIELD_TYPE_NULL
 
     override fun unregisterContentObserver(observer: ContentObserver?) {
         TODO("not implemented")
@@ -79,21 +81,48 @@ internal class SQLeadCursor(
         if (results.isClosed) 0 // it's closed, which means no results anyway
         else results.findColumn(columnName)
 
-    override fun requery(): Boolean {
-        TODO("not implemented")
-    }
+    // we have to implement the interface, but it's deprecated so we won't bother
+    // to try to support the functionality
+    @Suppress("OverridingDeprecatedMember")
+    override fun requery(): Boolean = throw UnsupportedOperationException()
 
     override fun getWantsAllOnMoveCalls(): Boolean {
         TODO("not implemented")
     }
 
-    override fun getColumnNames(): Array<String> = throw UnsupportedOperationException()
+    override fun getColumnNames(): Array<String> = (results as CoreResultSet).cols
 
     override fun getInt(columnIndex: Int): Int = results.getInt(columnIndex + 1)
 
     override fun isLast(): Boolean = results.isLast
 
-    override fun getType(columnIndex: Int): Int = throw UnsupportedOperationException()
+    override fun getType(columnIndex: Int): Int =
+        when ((results as ResultSetMetaData).getColumnType(columnIndex + 1)) {
+            Types.ARRAY,
+            Types.BLOB,
+            Types.BINARY -> Cursor.FIELD_TYPE_BLOB
+
+            Types.VARCHAR,
+            Types.CHAR -> Cursor.FIELD_TYPE_STRING
+
+            Types.DECIMAL,
+            Types.DOUBLE,
+            Types.NUMERIC,
+            Types.REAL,
+            Types.FLOAT -> Cursor.FIELD_TYPE_FLOAT
+
+            Types.BOOLEAN,
+            Types.TINYINT,
+            Types.SMALLINT,
+            Types.BIGINT,
+            Types.DATE,
+            Types.TIMESTAMP,
+            Types.INTEGER -> Cursor.FIELD_TYPE_INTEGER
+
+            Types.NULL -> Cursor.FIELD_TYPE_NULL
+
+            else -> throw IllegalStateException("Unknown type for column $columnIndex")
+        }
 
     override fun registerDataSetObserver(observer: DataSetObserver?) = throw UnsupportedOperationException()
 
@@ -107,11 +136,14 @@ internal class SQLeadCursor(
 
     override fun moveToLast(): Boolean = results.last()
 
+    // we have to implement the interface, but it's deprecated so we won't bother
+    // to try to support the functionality
+    @Suppress("OverridingDeprecatedMember")
     override fun deactivate() = throw UnsupportedOperationException()
 
     override fun getNotificationUri(): Uri = throw UnsupportedOperationException()
 
-    override fun getColumnName(columnIndex: Int): String = throw UnsupportedOperationException()
+    override fun getColumnName(columnIndex: Int): String = columnNames[columnIndex]
 
     override fun getColumnIndex(columnName: String?): Int = try {
         getColumnIndexOrThrow(columnName)
@@ -127,7 +159,7 @@ internal class SQLeadCursor(
 
     override fun move(offset: Int): Boolean = results.relative(offset)
 
-    override fun getColumnCount(): Int = throw UnsupportedOperationException()
+    override fun getColumnCount(): Int = columnNames.size
 
     override fun respond(extras: Bundle?): Bundle {
         TODO("not implemented")
