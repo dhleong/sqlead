@@ -26,9 +26,11 @@ class SQLeadOpenHelper(
         SQLeadSupportDatabase(
             dbPath = dbFile?.path
         ).also {
+            config.callback.onConfigure(it)
             if (!dbExists) {
                 config.callback.onCreate(it)
             }
+            config.callback.onOpen(it)
         }
     }
 
