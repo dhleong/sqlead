@@ -48,16 +48,16 @@ internal class SQLeadCursor(
 
     override fun moveToPosition(position: Int): Boolean = results.absolute(position)
 
-    override fun getLong(columnIndex: Int): Long = results.getLong(columnIndex)
+    override fun getLong(columnIndex: Int): Long = results.getLong(columnIndex + 1)
 
     //    override fun moveToFirst(): Boolean = results.absolute(0)
     override fun moveToFirst(): Boolean = !results.isClosed // cannot move backwards with jdbc
 
-    override fun getFloat(columnIndex: Int): Float = results.getFloat(columnIndex)
+    override fun getFloat(columnIndex: Int): Float = results.getFloat(columnIndex + 1)
 
     override fun moveToPrevious(): Boolean = results.relative(-1)
 
-    override fun getDouble(columnIndex: Int): Double = results.getDouble(columnIndex)
+    override fun getDouble(columnIndex: Int): Double = results.getDouble(columnIndex + 1)
 
     override fun close() {
         results.close()
@@ -69,7 +69,7 @@ internal class SQLeadCursor(
 
     override fun isFirst(): Boolean = results.isFirst
 
-    override fun isNull(columnIndex: Int): Boolean = results.getObject(columnIndex) == null
+    override fun isNull(columnIndex: Int): Boolean = results.getObject(columnIndex + 1) == null
 
     override fun unregisterContentObserver(observer: ContentObserver?) {
         TODO("not implemented")
@@ -89,7 +89,7 @@ internal class SQLeadCursor(
 
     override fun getColumnNames(): Array<String> = throw UnsupportedOperationException()
 
-    override fun getInt(columnIndex: Int): Int = results.getInt(columnIndex)
+    override fun getInt(columnIndex: Int): Int = results.getInt(columnIndex + 1)
 
     override fun isLast(): Boolean = results.isLast
 
@@ -119,11 +119,11 @@ internal class SQLeadCursor(
         -1
     }
 
-    override fun getBlob(columnIndex: Int): ByteArray = results.getBytes(columnIndex)
+    override fun getBlob(columnIndex: Int): ByteArray = results.getBytes(columnIndex + 1)
 
-    override fun getShort(columnIndex: Int): Short = results.getShort(columnIndex)
+    override fun getShort(columnIndex: Int): Short = results.getShort(columnIndex + 1)
 
-    override fun getString(columnIndex: Int): String? = results.getString(columnIndex)
+    override fun getString(columnIndex: Int): String? = results.getString(columnIndex + 1)
 
     override fun move(offset: Int): Boolean = results.relative(offset)
 

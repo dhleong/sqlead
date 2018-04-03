@@ -14,7 +14,7 @@ class QueryTest : BaseDbTest() {
             SELECT 42
             """
         ).use {
-            it.getInt(1)
+            it.getInt(0)
         }
 
         assert(result).isEqualTo(42)
@@ -26,7 +26,7 @@ class QueryTest : BaseDbTest() {
             FROM Ships
             """
         ).use {
-            it.getString(1) to it.getInt(2)
+            it.getString(0) to it.getInt(1)
         }
 
         assert(name).isEqualTo("Serenity")
