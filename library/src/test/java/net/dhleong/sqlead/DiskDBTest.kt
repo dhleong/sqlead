@@ -14,7 +14,7 @@ class DiskDBTest : BaseDbTest(inMemory = false) {
             FROM Ships
             """
         ).use {
-            it.getString(1) to it.getInt(2)
+            it.getString(0) to it.getInt(1)
         }
 
         assert(name).isEqualTo("Serenity")
