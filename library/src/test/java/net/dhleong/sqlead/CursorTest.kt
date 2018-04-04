@@ -102,4 +102,20 @@ class CursorTest : BaseDbTest() {
         }
     }
 
+    @Test fun `Test getCount for PRAGMA`() {
+        db.query("""
+            PRAGMA foreign_key_list(`Ships`)
+            """
+        ).use { cursor ->
+            assert(cursor.count).isEqualTo(0)
+        }
+
+        db.query("""
+            PRAGMA foreign_key_list(`Pilots`)
+            """
+        ).use { cursor ->
+            assert(cursor.count).isEqualTo(1)
+        }
+    }
+
 }

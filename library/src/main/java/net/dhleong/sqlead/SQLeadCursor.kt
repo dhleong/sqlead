@@ -25,10 +25,26 @@ internal class SQLeadCursor(
     private var extras = Bundle.EMPTY
 
     private val myCount by lazy {
-        val countQuery = "SELECT COUNT(*) FROM ($sql)"
-        SQLeadStatement(conn, countQuery).use {
-            query.bindTo(it)
-            it.simpleQueryForLong().toInt()
+        if (!sql.trim().startsWith("PRAGMA", ignoreCase = true)) {
+            val countQuery = "SELECT COUNT(*) FROM ($sql)"
+            SQLeadStatement(conn, countQuery).use {
+                query.bindTo(it)
+                it.simpleQueryForLong().toInt()
+            }
+        } else {
+            // for pragma queries we have to just execute it and count by hand
+            SQLeadStatement(conn, sql).use {
+                query.bindTo(it)
+                (it.query(query) as SQLeadCursor).use { cursor ->
+                    // NOTE unfortunately, result.last() is not implemented by jdbc,
+                    // so we have to roll there by hand
+                    var count = 0
+                    while (cursor.moveToNext()) {
+                        ++count
+                    }
+                    count
+                }
+            }
         }
     }
 
