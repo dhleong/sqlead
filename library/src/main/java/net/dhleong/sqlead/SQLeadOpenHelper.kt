@@ -26,10 +26,18 @@ class SQLeadOpenHelper(
         SQLeadSupportDatabase(
             dbPath = dbFile?.path
         ).also {
+            val currentVersion = it.version
+            val newVersion = config.callback.version
+
             config.callback.onConfigure(it)
             if (!dbExists) {
                 config.callback.onCreate(it)
+            } else if (currentVersion < newVersion) {
+                config.callback.onUpgrade(it, currentVersion, newVersion)
+            } else if (currentVersion > newVersion) {
+                config.callback.onDowngrade(it, currentVersion, newVersion)
             }
+            it.version = newVersion
             config.callback.onOpen(it)
         }
     }

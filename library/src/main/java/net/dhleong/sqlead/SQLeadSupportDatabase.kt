@@ -30,8 +30,6 @@ class SQLeadSupportDatabase(
     )
     private var pageSize: Long = 20
 
-    private var version = -1
-
     override fun setMaximumSize(numBytes: Long): Long = numBytes // ?
 
     override fun insert(table: String?, conflictAlgorithm: Int, values: ContentValues?): Long {
@@ -152,7 +150,9 @@ class SQLeadSupportDatabase(
         TODO("not implemented")
     }
 
-    override fun getVersion(): Int = version
+    override fun getVersion(): Int = SQLeadStatement(conn, "PRAGMA user_version;").use {
+        it.simpleQueryForLong().toInt()
+    }
 
     override fun execSQL(sql: String) {
         compileStatement(sql).use {
@@ -211,7 +211,7 @@ class SQLeadSupportDatabase(
     }
 
     override fun setVersion(version: Int) {
-        this.version = version
+        execSQL("PRAGMA user_version = $version;")
     }
 
     override fun beginTransactionWithListener(transactionListener: SQLiteTransactionListener?) {

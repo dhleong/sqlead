@@ -14,31 +14,45 @@ abstract class BaseDbTest(
     inMemory: Boolean = true
 ) {
 
+    private val dbDir =
+        if (inMemory) null
+        else File(".db-test")
+
     @Suppress("LeakingThis")
     private val factory = SQLeadSQLiteOpenHelperFactory(
-        dbDirectory =
-            if (inMemory) null
-            else File(".db-test")
+        dbDirectory = dbDir
     )
 
     protected lateinit var db: SupportSQLiteDatabase
 
     @Before fun setUp() {
-        db = factory.create(
-            SupportSQLiteOpenHelper.Configuration.builder(mock {  })
-                .callback(object : SupportSQLiteOpenHelper.Callback(1) {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        initDb(db)
-                    }
+        if (dbDir != null) {
+            // ensure we start with a clean slate;
+            File(dbDir, DB_FILE_NAME).delete()
+        }
 
-                    override fun onUpgrade(db: SupportSQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-                        throw UnsupportedOperationException()
-                    }
-                })
-                .name("test.db")
+        db = createDbUsingCallback(
+            object : SupportSQLiteOpenHelper.Callback(1) {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    initDb(db)
+                }
+
+                override fun onUpgrade(db: SupportSQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+                    throw UnsupportedOperationException()
+                }
+            }
+        )
+    }
+
+    protected fun createDbUsingCallback(
+        callback: SupportSQLiteOpenHelper.Callback
+    ): SupportSQLiteDatabase =
+        factory.create(
+            SupportSQLiteOpenHelper.Configuration.builder(mock {  })
+                .callback(callback)
+                .name(DB_FILE_NAME)
                 .build()
         ).writableDatabase
-    }
 
     protected open fun initDb(db: SupportSQLiteDatabase) {
         db.execSQL("""
@@ -52,9 +66,25 @@ abstract class BaseDbTest(
             INSERT INTO Ships (name, capacity)
             VALUES ("Serenity", 42)
             """)
+
+        db.execSQL("""
+            CREATE TABLE Pilots (
+                id INTEGER PRIMARY KEY,
+                name TEXT,
+                ship INTEGER REFERENCES Ship(id)
+            )
+            """)
+        db.execSQL("""
+            INSERT INTO Pilots (name, ship)
+            VALUES ("Wash", (SELECT id FROM Ships WHERE name = "Serenity"))
+            """)
     }
 
     @After fun tearDown() {
         db.close()
+    }
+
+    companion object {
+        const val DB_FILE_NAME = "test.db"
     }
 }
