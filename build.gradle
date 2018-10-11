@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.51'
     repositories {
         google()
         jcenter()
@@ -34,13 +34,13 @@ task clean(type: Delete) {
 }
 
 ext.SQLEAD_GROUP = 'com.github.dhleong.sqlead'
-ext.SQLEAD_VERSION = '0.3.0'
+ext.SQLEAD_VERSION = '0.3.1'
 
 ext.vs = [
         room: '1.0.0',
         test: [
                 assertk: '0.9',
-                mockitoKotlin: '1.5.0',
+                mockitoKotlin: '1.6.0',
         ]
 ]
 
@@ -48,6 +48,7 @@ ext.deps = [
         db: "android.arch.persistence:db:${vs.room}",
         roomTesting: "android.arch.persistence.room:testing:${vs.room}",
         sqlite: 'org.xerial:sqlite-jdbc:3.21.0.1',
+        kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:1.2.0",
 
         test: [
                 assertk: "com.willowtreeapps.assertk:assertk:0.9",
