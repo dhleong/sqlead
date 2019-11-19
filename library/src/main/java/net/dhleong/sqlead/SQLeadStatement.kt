@@ -1,8 +1,8 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SupportSQLiteQuery
-import android.arch.persistence.db.SupportSQLiteStatement
 import android.database.Cursor
+import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteStatement
 import java.sql.Connection
 
 internal class SQLeadStatement(

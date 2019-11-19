@@ -1,7 +1,7 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import assertk.assert
 import assertk.assertions.isEqualTo
 import org.junit.Test

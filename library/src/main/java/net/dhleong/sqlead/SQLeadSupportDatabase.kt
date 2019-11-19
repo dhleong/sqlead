@@ -1,15 +1,15 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SimpleSQLiteQuery
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.db.SupportSQLiteQuery
-import android.arch.persistence.db.SupportSQLiteStatement
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteTransactionListener
 import android.os.CancellationSignal
 import android.text.TextUtils.isEmpty
 import android.util.Pair
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteStatement
 import java.sql.DriverManager
 import java.util.Locale
 

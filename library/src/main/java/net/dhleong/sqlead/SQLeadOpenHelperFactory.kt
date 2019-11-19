@@ -1,6 +1,6 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import java.io.File
 
 /**

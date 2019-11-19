@@ -1,6 +1,5 @@
 package net.dhleong.sqlead
 
-import android.arch.persistence.db.SupportSQLiteQuery
 import android.content.ContentResolver
 import android.database.CharArrayBuffer
 import android.database.ContentObserver
@@ -8,6 +7,7 @@ import android.database.Cursor
 import android.database.DataSetObserver
 import android.net.Uri
 import android.os.Bundle
+import androidx.sqlite.db.SupportSQLiteQuery
 import org.sqlite.core.CoreResultSet
 import java.sql.Connection
 import java.sql.ResultSet

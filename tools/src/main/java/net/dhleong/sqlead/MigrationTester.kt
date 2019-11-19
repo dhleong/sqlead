@@ -1,11 +1,11 @@
 package net.dhleong.sqlead
 
 import android.app.Instrumentation
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.room.migration.Migration
-import android.arch.persistence.room.testing.MigrationTestHelper
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.room.migration.Migration
+import androidx.room.testing.MigrationTestHelper
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doAnswer
 import com.nhaarman.mockito_kotlin.doReturn
