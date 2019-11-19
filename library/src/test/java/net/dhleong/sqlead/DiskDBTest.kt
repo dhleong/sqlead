@@ -2,7 +2,7 @@ package net.dhleong.sqlead
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicBoolean
@@ -21,8 +21,8 @@ class DiskDBTest : BaseDbTest(inMemory = false) {
             it.getString(0) to it.getInt(1)
         }
 
-        assert(name).isEqualTo("Serenity")
-        assert(capacity).isEqualTo(42)
+        assertThat(name).isEqualTo("Serenity")
+        assertThat(capacity).isEqualTo(42)
     }
 
     @Test fun `Trigger onUpgrade`() {
@@ -42,8 +42,8 @@ class DiskDBTest : BaseDbTest(inMemory = false) {
             }
         )
 
-        assert(calledCreate.get()).isEqualTo(false)
-        assert(calledUpgradeTo.get()).isEqualTo(2)
+        assertThat(calledCreate.get()).isEqualTo(false)
+        assertThat(calledUpgradeTo.get()).isEqualTo(2)
     }
 
     @Test fun `Trigger onDowngrade`() {
@@ -75,7 +75,7 @@ class DiskDBTest : BaseDbTest(inMemory = false) {
             }
         )
 
-        assert(calledCreate.get()).isEqualTo(false)
-        assert(calledDowngradeTo.get()).isEqualTo(0)
+        assertThat(calledCreate.get()).isEqualTo(false)
+        assertThat(calledDowngradeTo.get()).isEqualTo(0)
     }
 }

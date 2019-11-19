@@ -27,6 +27,16 @@ allprojects {
                 versionCode: 1,
         ]
     }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+
+        kotlinOptions {
+            jvmTarget = '1.8'
+//            freeCompilerArgs += ["-Xinline-classes"]
+        }
+    }
 }
 
 task clean(type: Delete) {
@@ -39,7 +49,7 @@ ext.SQLEAD_VERSION = '0.3.1'
 ext.vs = [
         room: '2.2.1',
         test: [
-                assertk: '0.9',
+                assertk: '0.20',
                 mockitoKotlin: '1.6.0',
         ]
 ]
@@ -51,7 +61,7 @@ ext.deps = [
         kotlinReflect: "org.jetbrains.kotlin:kotlin-reflect:${ext.kotlin_version}",
 
         test: [
-                assertk: "com.willowtreeapps.assertk:assertk:0.9",
+                assertk: "com.willowtreeapps.assertk:assertk:${vs.test.assertk}",
                 mockitoKotlin: "com.nhaarman:mockito-kotlin:${vs.test.mockitoKotlin}",
         ]
 ]

@@ -1,6 +1,6 @@
 package net.dhleong.sqlead
 
-import assertk.assert
+import assertk.assertThat
 import assertk.assertions.isEqualTo
 import org.junit.Test
 
@@ -17,7 +17,7 @@ class QueryTest : BaseDbTest() {
             it.getInt(0)
         }
 
-        assert(result).isEqualTo(42)
+        assertThat(result).isEqualTo(42)
     }
 
     @Test fun `Simple select`() {
@@ -29,8 +29,8 @@ class QueryTest : BaseDbTest() {
             it.getString(0) to it.getInt(1)
         }
 
-        assert(name).isEqualTo("Serenity")
-        assert(capacity).isEqualTo(42)
+        assertThat(name).isEqualTo("Serenity")
+        assertThat(capacity).isEqualTo(42)
     }
 
 }

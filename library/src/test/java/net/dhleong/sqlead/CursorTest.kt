@@ -1,9 +1,11 @@
 package net.dhleong.sqlead
 
 import android.database.Cursor
-import assertk.assert
+import assertk.all
+import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isTrue
 import org.junit.Test
@@ -18,12 +20,12 @@ class CursorTest : BaseDbTest() {
             SELECT 42, 9001, 9002.3, 9004.5, "string", NULL
             """
         ).use {
-            assert(it.getInt(0)).isEqualTo(42)
-            assert(it.getLong(1)).isEqualTo(9001L)
-            assert(it.getFloat(2)).isEqualTo(9002.3f)
-            assert(it.getDouble(3)).isEqualTo(9004.5)
-            assert(it.getString(4)).isEqualTo("string")
-            assert(it.isNull(5)).isTrue()
+            assertThat(it.getInt(0)).isEqualTo(42)
+            assertThat(it.getLong(1)).isEqualTo(9001L)
+            assertThat(it.getFloat(2)).isEqualTo(9002.3f)
+            assertThat(it.getDouble(3)).isEqualTo(9004.5)
+            assertThat(it.getString(4)).isEqualTo("string")
+            assertThat(it.isNull(5)).isTrue()
         }
     }
 
@@ -32,7 +34,7 @@ class CursorTest : BaseDbTest() {
             SELECT "a", 2, 3.0
             """
         ).use { cursor ->
-            assert(cursor.columnCount).isEqualTo(3)
+            assertThat(cursor.columnCount).isEqualTo(3)
         }
     }
 
@@ -41,10 +43,10 @@ class CursorTest : BaseDbTest() {
             SELECT "a", 2, 3.0, NULL
             """
         ).use { cursor ->
-            assert(cursor.getType(0)).isEqualTo(Cursor.FIELD_TYPE_STRING)
-            assert(cursor.getType(1)).isEqualTo(Cursor.FIELD_TYPE_INTEGER)
-            assert(cursor.getType(2)).isEqualTo(Cursor.FIELD_TYPE_FLOAT)
-            assert(cursor.getType(3)).isEqualTo(Cursor.FIELD_TYPE_NULL)
+            assertThat(cursor.getType(0)).isEqualTo(Cursor.FIELD_TYPE_STRING)
+            assertThat(cursor.getType(1)).isEqualTo(Cursor.FIELD_TYPE_INTEGER)
+            assertThat(cursor.getType(2)).isEqualTo(Cursor.FIELD_TYPE_FLOAT)
+            assertThat(cursor.getType(3)).isEqualTo(Cursor.FIELD_TYPE_NULL)
         }
     }
 
@@ -53,14 +55,14 @@ class CursorTest : BaseDbTest() {
             SELECT "a" AS string, 2 AS int, 3.0 AS float
             """
         ).use { cursor ->
-            assert(cursor.getColumnIndex("string")).isEqualTo(0)
-            assert(cursor.getColumnIndex("int")).isEqualTo(1)
-            assert(cursor.getColumnIndex("float")).isEqualTo(2)
-            assert(cursor.getColumnIndex("notThere")).isEqualTo(-1)
+            assertThat(cursor.getColumnIndex("string")).isEqualTo(0)
+            assertThat(cursor.getColumnIndex("int")).isEqualTo(1)
+            assertThat(cursor.getColumnIndex("float")).isEqualTo(2)
+            assertThat(cursor.getColumnIndex("notThere")).isEqualTo(-1)
 
-            assert {
+            assertThat {
                 cursor.getColumnIndexOrThrow("notThere")
-            }.thrownError {
+            }.isFailure().all {
                 // the API interface specifies that an IllegalArgumentException be thrown
                 isInstanceOf(IllegalArgumentException::class)
             }
@@ -72,7 +74,7 @@ class CursorTest : BaseDbTest() {
             SELECT "a" AS string, 2 AS int, 3.0 AS float
             """
         ).use { cursor ->
-            assert(cursor.columnNames).containsExactly(
+            assertThat(cursor.columnNames).containsExactly(
                 "string",
                 "int",
                 "float"
@@ -85,9 +87,9 @@ class CursorTest : BaseDbTest() {
             SELECT "a" AS string, 2 AS int, 3.0 AS float
             """
         ).use { cursor ->
-            assert(cursor.getColumnName(0)).isEqualTo("string")
-            assert(cursor.getColumnName(1)).isEqualTo("int")
-            assert(cursor.getColumnName(2)).isEqualTo("float")
+            assertThat(cursor.getColumnName(0)).isEqualTo("string")
+            assertThat(cursor.getColumnName(1)).isEqualTo("int")
+            assertThat(cursor.getColumnName(2)).isEqualTo("float")
         }
     }
 
@@ -98,7 +100,7 @@ class CursorTest : BaseDbTest() {
             """,
             arrayOf(42)
         ).use { cursor ->
-            assert(cursor.count).isEqualTo(1)
+            assertThat(cursor.count).isEqualTo(1)
         }
     }
 
@@ -107,14 +109,14 @@ class CursorTest : BaseDbTest() {
             PRAGMA foreign_key_list(`Ships`)
             """
         ).use { cursor ->
-            assert(cursor.count).isEqualTo(0)
+            assertThat(cursor.count).isEqualTo(0)
         }
 
         db.query("""
             PRAGMA foreign_key_list(`Pilots`)
             """
         ).use { cursor ->
-            assert(cursor.count).isEqualTo(1)
+            assertThat(cursor.count).isEqualTo(1)
         }
     }
 
