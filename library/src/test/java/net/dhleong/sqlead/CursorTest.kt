@@ -120,4 +120,61 @@ class CursorTest : BaseDbTest() {
         }
     }
 
+    @Test fun `Test moveToPosition to -1`() {
+        db.execSQL("""
+            INSERT INTO Pilots (name, ship)
+            VALUES ("Inara", (SELECT id FROM Ships WHERE name = "Serenity")),
+                ("Mal", (SELECT id FROM Ships WHERE name = "Serenity"))
+            """)
+
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(3)
+            assertThat(cursor.position).isEqualTo(-1)
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Inara")
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Mal")
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Wash")
+
+            assertThat(cursor.moveToPosition(-1)).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Inara")
+        }
+    }
+
+    @Test fun `Test moveToPosition to middle`() {
+        db.execSQL("""
+            INSERT INTO Pilots (name, ship)
+            VALUES ("Inara", (SELECT id FROM Ships WHERE name = "Serenity")),
+                ("Mal", (SELECT id FROM Ships WHERE name = "Serenity"))
+            """)
+
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(3)
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Inara")
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Mal")
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Wash")
+
+            assertThat(cursor.moveToPosition(1)).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Mal")
+        }
+    }
+
 }

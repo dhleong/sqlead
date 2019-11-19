@@ -10,6 +10,7 @@ import android.os.Bundle
 import androidx.sqlite.db.SupportSQLiteQuery
 import org.sqlite.core.CoreResultSet
 import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import java.sql.SQLException
@@ -19,10 +20,12 @@ internal class SQLeadCursor(
     private val conn: Connection,
     private val sql: String,
     private val query: SupportSQLiteQuery,
-    private val results: ResultSet
+    private val statement: PreparedStatement
 ) : Cursor {
 
     private var extras = Bundle.EMPTY
+
+    private var results: ResultSet = statement.executeQuery()
 
     private val myCount by lazy {
         if (!sql.trim().startsWith("PRAGMA", ignoreCase = true)) {
@@ -66,15 +69,30 @@ internal class SQLeadCursor(
         this.extras = extras ?: Bundle.EMPTY
     }
 
-    override fun moveToPosition(position: Int): Boolean = results.absolute(position)
+    override fun moveToPosition(position: Int): Boolean {
+        if (position < this.position) {
+            // NOTE: jdbc sqlite for some reason only supports FORWARD_ONLY,
+            // so if we need to rewind, we close and re-query
+            results.close()
+            results = statement.executeQuery()
+        }
+
+        // another bummer about FORWARD_ONLY is that absolute() doesn't work,
+        // so we have to move one by one
+        for (i in 0 until (position - this.position)) {
+            if (!results.next()) return false
+        }
+
+        return true
+    }
 
     override fun getLong(columnIndex: Int): Long = results.getLong(columnIndex + 1)
 
-    override fun moveToFirst(): Boolean = !results.isClosed // cannot move backwards with jdbc
+    override fun moveToFirst(): Boolean = moveToPosition(0)
 
     override fun getFloat(columnIndex: Int): Float = results.getFloat(columnIndex + 1)
 
-    override fun moveToPrevious(): Boolean = results.relative(-1)
+    override fun moveToPrevious(): Boolean = moveToPosition(position - 1)
 
     override fun getDouble(columnIndex: Int): Double = results.getDouble(columnIndex + 1)
 
@@ -148,7 +166,7 @@ internal class SQLeadCursor(
 
     override fun moveToNext(): Boolean = results.next()
 
-    override fun getPosition(): Int = results.row
+    override fun getPosition(): Int = results.row - 1
 
     override fun isBeforeFirst(): Boolean = results.isBeforeFirst
 

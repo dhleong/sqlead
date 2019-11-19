@@ -60,7 +60,7 @@ internal class SQLeadStatement(
         conn,
         sql,
         query,
-        stmt.executeQuery()
+        stmt
     )
 }
 
