@@ -1,11 +1,13 @@
 package net.dhleong.sqlead
 
 import android.database.Cursor
+import androidx.sqlite.db.SupportSQLiteDatabase
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
+import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isTrue
 import org.junit.Test
@@ -121,11 +123,7 @@ class CursorTest : BaseDbTest() {
     }
 
     @Test fun `Test moveToPosition to -1`() {
-        db.execSQL("""
-            INSERT INTO Pilots (name, ship)
-            VALUES ("Inara", (SELECT id FROM Ships WHERE name = "Serenity")),
-                ("Mal", (SELECT id FROM Ships WHERE name = "Serenity"))
-            """)
+        db.insertPilots("Inara", "Mal")
 
         db.query("""
             SELECT name FROM Pilots
@@ -149,12 +147,8 @@ class CursorTest : BaseDbTest() {
         }
     }
 
-    @Test fun `Test moveToPosition to middle`() {
-        db.execSQL("""
-            INSERT INTO Pilots (name, ship)
-            VALUES ("Inara", (SELECT id FROM Ships WHERE name = "Serenity")),
-                ("Mal", (SELECT id FROM Ships WHERE name = "Serenity"))
-            """)
+    @Test fun `moveToPosition to middle`() {
+        db.insertPilots("Inara", "Mal")
 
         db.query("""
             SELECT name FROM Pilots
@@ -177,4 +171,100 @@ class CursorTest : BaseDbTest() {
         }
     }
 
+    @Test fun `moveToFirst returns true when expected`() {
+        db.insertPilots("Inara", "Mal")
+
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(3)
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Inara")
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Wash")
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Inara")
+        }
+    }
+
+    @Test fun `moveToFirst returns true as expected with a single entry`() {
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(1)
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Wash")
+
+            // no more
+            assertThat(cursor.moveToNext()).isFalse()
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.getString(0)).isEqualTo("Wash")
+        }
+    }
+
+    @Test fun `position should work as expected`() {
+        db.insertPilots("Mal", "Inara")
+
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(3)
+            assertThat(cursor.position).isEqualTo(-1)
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.position).isEqualTo(0)
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.position).isEqualTo(1)
+
+            assertThat(cursor.moveToNext()).isTrue()
+            assertThat(cursor.position).isEqualTo(2)
+
+            assertThat(cursor.moveToNext()).isFalse()
+            assertThat(cursor.position).isEqualTo(3)
+        }
+    }
+
+    @Test fun `position should work as expected with a single value`() {
+        db.query("""
+            SELECT name FROM Pilots
+            ORDER BY name ASC
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(1)
+            assertThat(cursor.position).isEqualTo(-1)
+
+            assertThat(cursor.moveToFirst()).isTrue()
+            assertThat(cursor.position).isEqualTo(0)
+
+            // no more
+            assertThat(cursor.moveToNext()).isFalse()
+            assertThat(cursor.position).isEqualTo(1)
+        }
+    }
+
+
+}
+
+private fun SupportSQLiteDatabase.insertPilots(vararg names: String) {
+    val values = names.map { name -> """
+        ("$name", (SELECT id FROM Ships WHERE name = "Serenity"))
+    """.trimIndent() }
+
+    execSQL("""
+        INSERT INTO Pilots (name, ship)
+        VALUES ${values.joinToString(", ")}
+    """)
 }

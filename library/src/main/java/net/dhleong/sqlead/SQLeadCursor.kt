@@ -80,10 +80,10 @@ internal class SQLeadCursor(
         // another bummer about FORWARD_ONLY is that absolute() doesn't work,
         // so we have to move one by one
         for (i in 0 until (position - this.position)) {
-            if (!results.next()) return false
+            if (!results.next()) break
         }
 
-        return true
+        return this.position == position
     }
 
     override fun getLong(columnIndex: Int): Long = results.getLong(columnIndex + 1)
@@ -166,7 +166,11 @@ internal class SQLeadCursor(
 
     override fun moveToNext(): Boolean = results.next()
 
-    override fun getPosition(): Int = results.row - 1
+    override fun getPosition(): Int = when {
+        // NOTE: results.row returns 0 when after the last row
+        isAfterLast -> count
+        else -> results.row - 1
+    }
 
     override fun isBeforeFirst(): Boolean = results.isBeforeFirst
 
