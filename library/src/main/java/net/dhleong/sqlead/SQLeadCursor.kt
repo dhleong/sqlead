@@ -167,8 +167,13 @@ internal class SQLeadCursor(
     override fun moveToNext(): Boolean = results.next()
 
     override fun getPosition(): Int = when {
-        // NOTE: results.row returns 0 when after the last row
+        // NOTE: results.row returns 0 whenever it's not on a row,
+        // including when closed or empty
+        count == 0 -> -1 // special case; isClosed returns true always
+
         isAfterLast -> count
+        isBeforeFirst || isClosed -> -1
+
         else -> results.row - 1
     }
 

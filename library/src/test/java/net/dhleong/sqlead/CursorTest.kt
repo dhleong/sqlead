@@ -255,6 +255,23 @@ class CursorTest : BaseDbTest() {
         }
     }
 
+    @Test fun `Handle empty cursor correctly`() {
+        db.query("""
+            SELECT name FROM Pilots
+            WHERE name = "Jayne"
+            """
+        ).use { cursor ->
+            assertThat(cursor.count).isEqualTo(0)
+            assertThat(cursor.position).isEqualTo(-1)
+
+            assertThat(cursor.moveToFirst()).isFalse()
+            assertThat(cursor.position).isEqualTo(-1)
+
+            assertThat(cursor.moveToNext()).isFalse()
+            assertThat(cursor.position).isEqualTo(-1)
+        }
+    }
+
 
 }
 
