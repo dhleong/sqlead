@@ -12,6 +12,7 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteStatement
 import java.sql.DriverManager
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
 
 class SQLeadSupportDatabase(
     /**
@@ -29,6 +30,9 @@ class SQLeadSupportDatabase(
         }
     )
     private var pageSize: Long = 20
+
+    private val transactionDepth = AtomicInteger(0)
+    private val errorTransactionsDepth = AtomicInteger(0)
 
     override fun setMaximumSize(numBytes: Long): Long = numBytes // ?
 
@@ -78,13 +82,21 @@ class SQLeadSupportDatabase(
     }
 
     override fun endTransaction() {
-        if (conn.autoCommit) {
-            // successful txn was already committed; this is a nop
-        } else {
-            // if we still have autoCommit disabled, the transaction failed
-            conn.rollback()
-            conn.autoCommit = true
+        val newDepth = transactionDepth.decrementAndGet()
+        if (newDepth > 0) {
+            // still an outer transaction
+            return
+        } else if (newDepth < 0) {
+            throw IllegalStateException("Unbalanced transaction: ${-newDepth} too many endTransaction calls")
         }
+
+        if (errorTransactionsDepth.getAndSet(0) > 0) {
+            // some number of (possibly nested) transactions failed; rollback everything
+            conn.rollback()
+        }
+
+        // restore autoCommit state
+        conn.autoCommit = true
     }
 
     override fun getMaximumSize(): Long = Long.MAX_VALUE
@@ -95,6 +107,11 @@ class SQLeadSupportDatabase(
 
     override fun beginTransaction() {
         conn.autoCommit = false
+        transactionDepth.incrementAndGet()
+
+        // assume the transaction will fail; a successful transaction
+        // will offset this increment with a call to setTransactionSuccessful
+        errorTransactionsDepth.incrementAndGet()
     }
 
     override fun update(
@@ -203,11 +220,11 @@ class SQLeadSupportDatabase(
     }
 
     override fun beginTransactionNonExclusive() {
-        conn.autoCommit = false
+        beginTransaction()
     }
 
     override fun setTransactionSuccessful() {
-        conn.autoCommit = true
+        errorTransactionsDepth.decrementAndGet()
     }
 
     override fun setVersion(version: Int) {
@@ -215,11 +232,11 @@ class SQLeadSupportDatabase(
     }
 
     override fun beginTransactionWithListener(transactionListener: SQLiteTransactionListener?) {
-        conn.autoCommit = false
+        beginTransaction()
 //        transactionListener?.onBegin()
     }
 
-    override fun inTransaction(): Boolean = conn.autoCommit
+    override fun inTransaction(): Boolean = !conn.autoCommit
 
     override fun isReadOnly(): Boolean = false
 

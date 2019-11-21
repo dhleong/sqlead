@@ -275,7 +275,7 @@ class CursorTest : BaseDbTest() {
 
 }
 
-private fun SupportSQLiteDatabase.insertPilots(vararg names: String) {
+fun SupportSQLiteDatabase.insertPilots(vararg names: String) {
     val values = names.map { name -> """
         ("$name", (SELECT id FROM Ships WHERE name = "Serenity"))
     """.trimIndent() }
