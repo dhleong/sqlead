@@ -21,6 +21,7 @@ internal class SQLeadStatement(
     }
 
     override fun bindString(index: Int, value: String?) {
+        requireNotNull(value)
         stmt.setString(index, value)
     }
 
@@ -43,7 +44,8 @@ internal class SQLeadStatement(
     override fun executeInsert(): Long = stmt.executeUpdate().toLong()
 
     override fun bindBlob(index: Int, value: ByteArray?) {
-        stmt.setBlob(index, value?.inputStream())
+        requireNotNull(value)
+        stmt.setBlob(index, value.inputStream())
     }
 
     override fun executeUpdateDelete(): Int = stmt.executeUpdate()
